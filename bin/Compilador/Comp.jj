@@ -1,0 +1,310 @@
+options {
+    STATIC = false;
+}
+
+PARSER_BEGIN(GolangParser)
+package Analizador;
+public class GolangParser {
+    public static void main(String[] args) throws ParseException {
+        GolangParser parser = new GolangParser(System.in);
+        parser.CompilationUnit();
+        System.out.println("Parsing completed successfully.");
+    }
+}
+
+PARSER_END(GolangParser)
+
+// Palabras reservadas
+TOKEN : { 
+    < IMPORT : "import" >
+|   < PACKAGE : "package" >
+|   < FUNC : "func" >
+|   < VAR : "var" >
+|   < CONST : "const" >
+|   < TYPE : "type" >
+|   < STRUCT : "struct" >
+|   < INTERFACE : "interface" >
+|   < MAP : "map" >
+|   < SLICE : "slice" >
+|   < RANGE : "range" >
+|   < FOR : "for" >
+|   < IF : "if" >
+|   < ELSE : "else" >
+|   < SWITCH : "switch" >
+|   < CASE : "case" >
+|   < DEFAULT : "default" >
+|   < RETURN : "return" >
+}
+
+// Operadores
+TOKEN : {
+    < DOT : "." >
+|   < PLUS : "+" >
+|   < MINUS : "-" >
+|   < MULTIPLY : "*" >
+|   < DIVIDE : "/" >
+|   < MOD : "%" >
+|   < XOR : "^" >
+|   < EQUAL : "==" >
+|   < ASSIGN : "=" >
+|   < NOT_EQUAL : "!=" >
+|   < COLON : ":" >
+|   < COLON_ASSIGN : ":=" >
+|   < LT : "<" >
+|   < GT : ">" >
+|   < GTE : ">=" >
+|   < LTE : "<=" >
+|   < AND : "&&" >
+|   < OR : "||" >
+|   < NOT : "!" >
+}
+
+// Delimitadores
+TOKEN : {
+    < LPAREN : "(" >
+|   < RPAREN : ")" >
+|   < LBRACE : "{" >
+|   < RBRACE : "}" >
+|   < LBRACKET : "[" >
+|   < RBRACKET : "]" >
+|   < COMMA : "," >
+|   < SEMICOLON : ";" >
+}
+
+// Identificadores y literales
+TOKEN : {
+    < IDENTIFIER : (["a"-"z", "A"-"Z", "_"]) (["a"-"z", "A"-"Z", "0"-"9", "_"])* >
+|   < INTEGER : (["0"-"9"])+ >
+|   < FLOAT : (["0"-"9"])+ "." (["0"-"9"])* >
+|   < STRING : "\"" (~["\"", "\n", "\\"] | "\\" .)* "\"" >
+|   < CHAR : "'" (~["'", "\n", "\\"] | "\\" .)* "'" >
+}
+
+// Ignorar espacios en blanco y comentarios
+TOKEN : {
+    < WHITESPACE : ([" ", "\t", "\n", "\r"])+ > { skip(); }
+|   < SINGLE_LINE_COMMENT : "//" (~["\n", "\r"])* ("\n" | "\r" | "\r\n") > { skip(); }
+|   < MULTI_LINE_COMMENT : "/*" (~["*"])* "*" (~["/"] (~["*"])* "*")* "/" > { skip(); }
+}
+
+// Reglas gramaticales
+void CompilationUnit() : {}
+{
+    (PackageClause() ImportDecl()* TopLevelDecl()*) <EOF>
+}
+
+void PackageClause() : {}
+{
+    <PACKAGE> <IDENTIFIER> <SEMICOLON>
+}
+
+void ImportDecl() : {}
+{
+    <IMPORT> ImportSpec() (<SEMICOLON>)*
+}
+
+void ImportSpec() : {}
+{
+    ( <LPAREN> ImportSpec() (<SEMICOLON>)* <RPAREN> ) | ( <STRING> )
+}
+
+void TopLevelDecl() : {}
+{
+    FunctionDecl() | TypeDecl() | VarDecl()
+}
+
+void FunctionDecl() : {}
+{
+    <FUNC> <IDENTIFIER> Signature FunctionBody
+}
+
+void Signature() : {}
+{
+    <LPAREN> ParameterList() <RPAREN>
+}
+
+void ParameterList() : {}
+{
+    ( ParameterDecl() ( <COMMA> ParameterDecl() )* )?
+}
+
+void ParameterDecl() : {}
+{
+    <IDENTIFIER> <IDENTIFIER>
+}
+
+void FunctionBody() : {}
+{
+    Block()
+}
+
+void Block() : {}
+{
+    <LBRACE> StatementList() <RBRACE>
+}
+
+void StatementList() : {}
+{
+    ( Statement() )*
+}
+
+void Statement() : {}
+{
+    SimpleStmt() | ReturnStmt() | Block() | IfStmt() | ForStmt()
+}
+
+void SimpleStmt() : {}
+{
+    ExpressionStmt() | Assignment() | ShortVarDecl()
+}
+
+void ExpressionStmt() : {}
+{
+    Expression()
+}
+
+void Assignment() : {}
+{
+    Expression() <ASSIGN> Expression()
+}
+
+void ShortVarDecl() : {}
+{
+    <IDENTIFIER> <COLON_ASSIGN> Expression()
+}
+
+void ReturnStmt() : {}
+{
+    <RETURN> Expression() <SEMICOLON>
+}
+
+void IfStmt() : {}
+{
+    <IF> Expression() Block() ( <ELSE> Block() )?
+}
+
+void ForStmt() : {}
+{
+    <FOR> ( ForClause() | RangeClause() ) Block()
+}
+
+void ForClause() : {}
+{
+    SimpleStmt() <SEMICOLON> Expression() <SEMICOLON> SimpleStmt()
+}
+
+void RangeClause() : {}
+{
+    ( <IDENTIFIER> <COMMA> <IDENTIFIER> | <IDENTIFIER> ) <COLON_ASSIGN> <RANGE> Expression()
+}
+
+void Expression() : {}
+{
+    Primary() ( <PLUS> Primary() | <MINUS> Primary() | <MULTIPLY> Primary() | <DIVIDE> Primary() | <MOD> Primary() )*
+}
+
+void Primary() : {}
+{
+    <IDENTIFIER> | <INTEGER> | <FLOAT> | <STRING> | <CHAR> | <LPAREN> Expression() <RPAREN>
+}
+
+void TypeDecl() : {}
+{
+    <TYPE> ( TypeSpec() ( <COMMA> TypeSpec() )* ) <SEMICOLON>
+}
+
+void TypeSpec() : {}
+{
+    <IDENTIFIER> Type()
+}
+
+void Type() : {}
+{
+    TypeName() | TypeLit() | <LPAREN> Type() <RPAREN>
+}
+
+void TypeName() : {}
+{
+    <IDENTIFIER>
+}
+
+void TypeLit() : {}
+{
+    ArrayType() | StructType() | PointerType() | FunctionType() | InterfaceType() | SliceType() | MapType() | ChannelType()
+}
+
+void ArrayType() : {}
+{
+    <LBRACKET> ArrayLength() <RBRACKET> ElementType()
+}
+
+void ArrayLength() : {}
+{
+    <INTEGER>
+}
+
+void ElementType() : {}
+{
+    Type()
+}
+
+void StructType() : {}
+{
+    <STRUCT> <LBRACE> FieldDecl() ( <SEMICOLON> FieldDecl() )* <RBRACE>
+}
+
+void FieldDecl() : {}
+{
+    IdentifierList() Type()
+}
+
+void IdentifierList() : {}
+{
+    <IDENTIFIER> ( <COMMA> <IDENTIFIER> )*
+}
+
+void PointerType() : {}
+{
+    <MULTIPLY> BaseType()
+}
+
+void BaseType() : {}
+{
+    Type()
+}
+
+void FunctionType() : {}
+{
+    <FUNC> Signature()
+}
+
+void InterfaceType() : {}
+{
+    <INTERFACE> <LBRACE> MethodSpec() ( <SEMICOLON> MethodSpec() )* <RBRACE>
+}
+
+void MethodSpec() : {}
+{
+    <IDENTIFIER> Signature()
+}
+
+void SliceType() : {}
+{
+    <LBRACKET> <RBRACKET> ElementType()
+}
+
+void MapType() : {}
+{
+    <MAP> <LBRACKET> KeyType() <RBRACKET> ElementType()
+}
+
+void KeyType() : {}
+{
+    Type()
+}
+
+void ChannelType() : {}
+{
+    // Aquí puedes definir el tipo de canal si es necesario
+}
+
