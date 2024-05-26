@@ -3,12 +3,19 @@ options {
 }
 
 PARSER_BEGIN(GolangParser)
-package Analizador;
+
+import java.io.*;
 public class GolangParser {
-    public static void main(String[] args) throws ParseException {
-        GolangParser parser = new GolangParser(System.in);
-        parser.CompilationUnit();
-        System.out.println("Parsing completed successfully.");
+    public static void main(String[] args) {
+        try {
+            GolangParser parser = new GolangParser(System.in);
+            parser.CompilationUnit();
+            System.out.println("Parsing completed successfully.");
+        } catch (ParseException e) {
+            System.err.println(e.getMessage());
+        } catch (TokenMgrError e) {
+            System.err.println("Lexical error: " + e.getMessage());
+        }
     }
 }
 
@@ -34,6 +41,7 @@ TOKEN : {
 |   < CASE : "case" >
 |   < DEFAULT : "default" >
 |   < RETURN : "return" >
+|   < CHAN : "chan" >
 }
 
 // Operadores
@@ -115,7 +123,7 @@ void TopLevelDecl() : {}
 
 void FunctionDecl() : {}
 {
-    <FUNC> <IDENTIFIER> Signature FunctionBody
+    <FUNC> <IDENTIFIER> Signature() FunctionBody()
 }
 
 void Signature() : {}
@@ -303,8 +311,12 @@ void KeyType() : {}
     Type()
 }
 
-void ChannelType() : {}
+void VarDecl() : {}
 {
-    // Aquí puedes definir el tipo de canal si es necesario
+    <VAR> VarSpec() (<COMMA> VarSpec())* <SEMICOLON>
 }
 
+void VarSpec() : {}
+{
+    <IDENTIFIER> ( <COMMA> <IDENTIFIER> )* Type() ( <ASSIGN> Expression() )?
+}
