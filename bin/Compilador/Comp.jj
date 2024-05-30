@@ -1,5 +1,8 @@
 options {
-    STATIC = false;
+  IGNORE_CASE = true;
+  STATIC = false;
+  BUILD_PARSER = true;
+  FORCE_LA_CHECK = true;
 }
 
 PARSER_BEGIN(GolangParser)
@@ -20,6 +23,15 @@ public class GolangParser {
 }
 
 PARSER_END(GolangParser)
+
+SKIP : {
+    " "
+  | "\t"
+  | "\r"
+  | "\n"
+  |  <"//" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>
+  |  <"/*" (~["*"])* "*" ("*" | ~["*","/"] (~["*"])* "*")* "/">
+}
 
 // Palabras reservadas
 TOKEN : { 
@@ -80,19 +92,18 @@ TOKEN : {
 }
 
 // Identificadores y literales
-TOKEN : {
+TOKEN : { 
     < IDENTIFIER : (["a"-"z", "A"-"Z", "_"]) (["a"-"z", "A"-"Z", "0"-"9", "_"])* >
 |   < INTEGER : (["0"-"9"])+ >
 |   < FLOAT : (["0"-"9"])+ "." (["0"-"9"])* >
-|   < STRING : "\"" (~["\"", "\n", "\\"] | "\\" .)* "\"" >
-|   < CHAR : "'" (~["'", "\n", "\\"] | "\\" .)* "'" >
-}
-
-// Ignorar espacios en blanco y comentarios
-TOKEN : {
-    < WHITESPACE : ([" ", "\t", "\n", "\r"])+ > { skip(); }
-|   < SINGLE_LINE_COMMENT : "//" (~["\n", "\r"])* ("\n" | "\r" | "\r\n") > { skip(); }
-|   < MULTI_LINE_COMMENT : "/*" (~["*"])* "*" (~["/"] (~["*"])* "*")* "/" > { skip(); }
+|   < STRING : 
+          "\"" ( ~["\"","\\","\n","\r"] 
+        | "\\" ( ["n","t","b","r","f","\\","\'","\""] 
+        | ["0"-"7"] (["0"-"7"])?  
+        | ["0"-"3"] ["0"-"7"] ["0"-"7"] 
+        | ( ["\n","\r"] 
+        | "\r\n")))* "\""
+    >
 }
 
 // Reglas gramaticales
@@ -108,7 +119,7 @@ void PackageClause() : {}
 
 void ImportDecl() : {}
 {
-    <IMPORT> ImportSpec() (<SEMICOLON>)*
+    <IMPORT> ImportSpec() <SEMICOLON>
 }
 
 void ImportSpec() : {}
@@ -213,7 +224,7 @@ void Expression() : {}
 
 void Primary() : {}
 {
-    <IDENTIFIER> | <INTEGER> | <FLOAT> | <STRING> | <CHAR> | <LPAREN> Expression() <RPAREN>
+    <IDENTIFIER> | <INTEGER> | <FLOAT> | <STRING> | <LPAREN> Expression() <RPAREN>
 }
 
 void TypeDecl() : {}
