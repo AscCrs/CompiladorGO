@@ -1,14 +1,12 @@
 options {
-  IGNORE_CASE = true;
-  STATIC = false;
-  BUILD_PARSER = true;
-  FORCE_LA_CHECK = true;
+    IGNORE_CASE = true;
+    STATIC = false;
+    BUILD_PARSER = true;
 }
 
 PARSER_BEGIN(GolangParser)
 
 package Analizador;
-import java.io.*;
 public class GolangParser { }
 
 PARSER_END(GolangParser)
@@ -31,7 +29,6 @@ TOKEN : {
 |   < CONST : "const" >
 |   < TYPE : "type" >
 |   < STRUCT : "struct" >
-|   < INTERFACE : "interface" >
 |   < MAP : "map" >
 |   < SLICE : "slice" >
 |   < RANGE : "range" >
@@ -42,7 +39,6 @@ TOKEN : {
 |   < CASE : "case" >
 |   < DEF : "default" >
 |   < RETURN : "return" >
-|   < CHAN : "chan" >
 }
 
 // Operadores
@@ -103,15 +99,266 @@ void CompilationUnit() : {}
 
 void PackageDeclaration() : {}
 {
-    < PACKAGE > < IDENTIFIER > (< SEMICOLON >)?
+    <PACKAGE> <IDENTIFIER> (<SEMICOLON>)?
 }
 
 void ImportDeclaration() : {}
 {
-    <IMPORT> <STRING> (<SEMICOLON>)?
+    <IMPORT> (<STRING> (<SEMICOLON>) | <LPAREN> <STRING> ( <COMMA> <STRING> )* <RPAREN> (<SEMICOLON>)?)
 }
 
 void TopLevelDeclaration() : {}
 {
-    <STRING>
+    FunctionDecl() | TypeDecl() | VarDecl()
+}
+
+void FunctionDecl() : {System.out.println("Function"); }
+{
+    <FUNC> <IDENTIFIER> Signature() FunctionBody()
+}
+
+void Signature() : {}
+{
+    <LPAREN> ParameterList() <RPAREN> ( TypeName() )?
+}
+
+void ParameterList() : {}
+{
+    ( ParameterDecl() ( <COMMA> ParameterDecl() )* )?
+}
+
+void ParameterDecl() : {}
+{
+    <IDENTIFIER> TypeName()
+}
+
+void FunctionBody() : {}
+{
+    Block()
+}
+
+void Block() : {}
+{
+    <LBRACE> StatementList() <RBRACE>
+}
+
+void StatementList() : {}
+{
+    ( Statement() )*
+}
+
+void Statement() : {}
+{
+    SimpleStmt() | ReturnStmt() | ControlStatement()
+}
+
+void ControlStatement() : {}
+{
+    IfStmt() | ForStmt()
+}
+
+void SimpleStmt() : {}
+{
+    LOOKAHEAD(ExpressionStmt()) ExpressionStmt() | Assignment() | VarDecl()
+}
+
+void RegularStatement() : {}
+{
+    <DOT> <IDENTIFIER> RegularParamStmt() ( <SEMICOLON> )?
+}
+
+void RegularParamStmt() : {}
+{
+    ( <LPAREN> ( RegularExpressionStmt() ( <COMMA> RegularExpressionStmt() )* )? <RPAREN> )
+}
+
+void RegularExpressionStmt() : {} 
+{
+    <IDENTIFIER> (ObjectElement() | CallFunction())? | <STRING> | ObjectElement()
+}
+
+void CallFunction() : {}
+{
+    <LPAREN> ( RegularExpressionStmt() ( <COMMA> RegularExpressionStmt() )* )? <RPAREN>
+}
+
+void ObjectElement() : {} 
+{
+    <DOT> <IDENTIFIER>
+}
+
+void ExpressionStmt() : {}
+{
+    <IDENTIFIER> (RegularStatement() | Expression())
+}
+
+void Assignment() : {}
+{
+    Expression() (<ASSIGN> | <COLON_ASSIGN>) Expression() 
+}
+
+void ReturnStmt() : {}
+{
+    <RETURN> Expression() ( <SEMICOLON> )?
+}
+
+void IfStmt() : {}
+{
+    <IF> Expression() Block() ( <ELSE> Block() )?
+}
+
+void ForStmt() : {}
+{
+    <FOR> 
+    (
+        LOOKAHEAD(ForClause()) ForClause()
+        |
+        RangeClause()
+    ) 
+    Block()
+}
+
+void ForClause() : {}
+{
+    SimpleStmt() <SEMICOLON> Expression() <SEMICOLON> SimpleStmt()
+}
+
+void RangeClause() : {}
+{
+    <IDENTIFIER> (<COMMA> <IDENTIFIER>)? <COLON_ASSIGN> <RANGE> Expression()
+}
+
+void SimpleExpression(): {}
+{
+    <PLUS> | <MINUS> | <MULTIPLY> | <DIVIDE> | <MOD>
+}
+
+void Expression() : {}
+{
+    (AssignMulExp() (SimpleExpression() AssignMulExp())*) | TypeLit()
+}
+
+void AssignMulExp() : {}
+{
+    MulExp() ( <COMMA> MulExp() ) * 
+}
+
+void MulExp() : {} 
+{
+    <INTEGER> | <STRING> | <FLOAT> | <IDENTIFIER>
+}
+
+void Primary() : {}
+{
+    <IDENTIFIER> | <INTEGER> | <FLOAT> | <STRING> | <LPAREN> Expression() <RPAREN>
+}
+
+void TypeDecl() : {}
+{
+    <TYPE> ( TypeSpec() ( <COMMA> TypeSpec() )* ) ( <SEMICOLON> )?
+}
+
+void TypeSpec() : {}
+{
+    <IDENTIFIER> Type()
+}
+
+void Type() : {}
+{
+    TypeName() | TypeLit() | <LPAREN> Type() <RPAREN>
+}
+
+void TypeName() : {}
+{
+    <STRING> | <INTEGER> | <FLOAT> | <IDENTIFIER>
+}
+
+void TypeLit() : {System.out.println("Type");}
+{
+    (<LBRACKET> (SliceType() | ArrayType())) | StructType() | PointerType() | FunctionType() | MapType()
+}
+
+void ArrayType() : {}
+{
+    ArrayLength() <RBRACKET> ElementType()
+}
+
+void ArrayLength() : {}
+{
+    <INTEGER>
+}
+
+void ElementType() : {}
+{
+    Type()
+}
+
+void StructType() : {System.out.println("Struct");}
+{
+    <STRUCT> <LBRACE> ( StructDeclaration() )* <RBRACE>
+}
+
+void StructDeclaration() : {} 
+{
+    <IDENTIFIER> TypeName()
+}
+
+void FieldDecl() : {}
+{
+    IdentifierList() Type()
+}
+
+void IdentifierList() : {}
+{
+    <IDENTIFIER> ( <COMMA> <IDENTIFIER> )*
+}
+
+void PointerType() : {}
+{
+    <MULTIPLY> BaseType()
+}
+
+void BaseType() : {}
+{
+    Type()
+}
+
+void FunctionType() : {}
+{
+    <FUNC> Signature()
+}
+
+void MethodSpec() : {}
+{
+    <IDENTIFIER> Signature()
+}
+
+void SliceType() : {System.out.println("Slice");}
+{
+    <RBRACKET> TypeName() (<LBRACE> AssignMulExp() <RBRACE>)?
+}
+
+void MapType() : {}
+{
+    <MAP> <LBRACKET> KeyType() <RBRACKET> <IDENTIFIER> <LBRACE> (MapList() <COMMA>)* <RBRACE>
+}
+
+void KeyType() : {}
+{
+    Type()
+}
+
+void MapList(): {}
+{
+    TypeName() <COLON> <IDENTIFIER> <LBRACE> (<IDENTIFIER> <COLON> TypeName() (<COMMA> <IDENTIFIER> <COLON> TypeName())*)? <RBRACE>
+}
+
+void VarDecl() : {System.out.println("Si");}
+{
+    <VAR> VarSpec() (<SEMICOLON>)?
+}
+
+void VarSpec() : {}
+{
+    <IDENTIFIER> (<COMMA> <IDENTIFIER>)* (TypeName() (<ASSIGN> Expression())?)
 }
