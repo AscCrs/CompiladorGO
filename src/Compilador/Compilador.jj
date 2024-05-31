@@ -113,5 +113,205 @@ void ImportDeclaration() : {}
 
 void TopLevelDeclaration() : {}
 {
-    <STRING>
+    FunctionDecl() | TypeDecl() | VarDecl()
+}
+
+void FunctionDecl() : {}
+{
+    <FUNC> <IDENTIFIER> Signature() FunctionBody()
+}
+
+void Signature() : {}
+{
+    <LPAREN> ParameterList() <RPAREN>
+}
+
+void ParameterList() : {}
+{
+    ( ParameterDecl() ( <COMMA> ParameterDecl() )* )?
+}
+
+void ParameterDecl() : {}
+{
+    <IDENTIFIER> <IDENTIFIER>
+}
+
+void FunctionBody() : {}
+{
+    Block()
+}
+
+void Block() : {}
+{
+    <LBRACE> StatementList() <RBRACE>
+}
+
+void StatementList() : {}
+{
+    ( Statement() )*
+}
+
+void Statement() : {}
+{
+    SimpleStmt() | ReturnStmt() | Block() | IfStmt() | ForStmt()
+}
+
+void SimpleStmt() : {}
+{
+    ExpressionStmt() | Assignment() | ShortVarDecl()
+}
+
+void ExpressionStmt() : {}
+{
+    Expression()
+}
+
+void Assignment() : {}
+{
+    Expression() <ASSIGN> Expression()
+}
+
+void ShortVarDecl() : {}
+{
+    <IDENTIFIER> <COLON_ASSIGN> Expression()
+}
+
+void ReturnStmt() : {}
+{
+    <RETURN> Expression() <SEMICOLON>
+}
+
+void IfStmt() : {}
+{
+    <IF> Expression() Block() ( <ELSE> Block() )?
+}
+
+void ForStmt() : {}
+{
+    <FOR> ( ForClause() | RangeClause() ) Block()
+}
+
+void ForClause() : {}
+{
+    SimpleStmt() <SEMICOLON> Expression() <SEMICOLON> SimpleStmt()
+}
+
+void RangeClause() : {}
+{
+    ( <IDENTIFIER> <COMMA> <IDENTIFIER> | <IDENTIFIER> ) <COLON_ASSIGN> <RANGE> Expression()
+}
+
+void Expression() : {}
+{
+    Primary() ( <PLUS> Primary() | <MINUS> Primary() | <MULTIPLY> Primary() | <DIVIDE> Primary() | <MOD> Primary() )*
+}
+
+void Primary() : {}
+{
+    <IDENTIFIER> | <INTEGER> | <FLOAT> | <STRING> | <LPAREN> Expression() <RPAREN>
+}
+
+void TypeDecl() : {}
+{
+    <TYPE> ( TypeSpec() ( <COMMA> TypeSpec() )* ) <SEMICOLON>
+}
+
+void TypeSpec() : {}
+{
+    <IDENTIFIER> Type()
+}
+
+void Type() : {}
+{
+    TypeName() | TypeLit() | <LPAREN> Type() <RPAREN>
+}
+
+void TypeName() : {}
+{
+    <IDENTIFIER>
+}
+
+void TypeLit() : {}
+{
+    ArrayType() | StructType() | PointerType() | FunctionType() | InterfaceType() | SliceType() | MapType() | ChannelType()
+}
+
+void ArrayType() : {}
+{
+    <LBRACKET> ArrayLength() <RBRACKET> ElementType()
+}
+
+void ArrayLength() : {}
+{
+    <INTEGER>
+}
+
+void ElementType() : {}
+{
+    Type()
+}
+
+void StructType() : {}
+{
+    <STRUCT> <LBRACE> FieldDecl() ( <SEMICOLON> FieldDecl() )* <RBRACE>
+}
+
+void FieldDecl() : {}
+{
+    IdentifierList() Type()
+}
+
+void IdentifierList() : {}
+{
+    <IDENTIFIER> ( <COMMA> <IDENTIFIER> )*
+}
+
+void PointerType() : {}
+{
+    <MULTIPLY> BaseType()
+}
+
+void BaseType() : {}
+{
+    Type()
+}
+
+void FunctionType() : {}
+{
+    <FUNC> Signature()
+}
+
+void InterfaceType() : {}
+{
+    <INTERFACE> <LBRACE> MethodSpec() ( <SEMICOLON> MethodSpec() )* <RBRACE>
+}
+
+void MethodSpec() : {}
+{
+    <IDENTIFIER> Signature()
+}
+
+void SliceType() : {}
+{
+    <LBRACKET> <RBRACKET> ElementType()
+}
+
+void MapType() : {}
+{
+    <MAP> <LBRACKET> KeyType() <RBRACKET> ElementType()
+}
+
+void KeyType() : {}
+{
+    Type()
+}
+
+void VarDecl() : {}
+{
+    <VAR> VarSpec() (<COMMA> VarSpec())* <SEMICOLON>
+}
+
+void VarSpec() : {}
+{
+    <IDENTIFIER> ( <COMMA> <IDENTIFIER> )* Type() ( <ASSIGN> Expression() )?
 }
