@@ -25,91 +25,87 @@ public interface GolangParserConstants {
   /** RegularExpression Id. */
   int STRUCT = 13;
   /** RegularExpression Id. */
-  int INTERFACE = 14;
+  int MAP = 14;
   /** RegularExpression Id. */
-  int MAP = 15;
+  int SLICE = 15;
   /** RegularExpression Id. */
-  int SLICE = 16;
+  int RANGE = 16;
   /** RegularExpression Id. */
-  int RANGE = 17;
+  int FOR = 17;
   /** RegularExpression Id. */
-  int FOR = 18;
+  int IF = 18;
   /** RegularExpression Id. */
-  int IF = 19;
+  int ELSE = 19;
   /** RegularExpression Id. */
-  int ELSE = 20;
+  int SWITCH = 20;
   /** RegularExpression Id. */
-  int SWITCH = 21;
+  int CASE = 21;
   /** RegularExpression Id. */
-  int CASE = 22;
+  int DEF = 22;
   /** RegularExpression Id. */
-  int DEF = 23;
+  int RETURN = 23;
   /** RegularExpression Id. */
-  int RETURN = 24;
+  int DOT = 24;
   /** RegularExpression Id. */
-  int CHAN = 25;
+  int PLUS = 25;
   /** RegularExpression Id. */
-  int DOT = 26;
+  int MINUS = 26;
   /** RegularExpression Id. */
-  int PLUS = 27;
+  int MULTIPLY = 27;
   /** RegularExpression Id. */
-  int MINUS = 28;
+  int DIVIDE = 28;
   /** RegularExpression Id. */
-  int MULTIPLY = 29;
+  int MOD = 29;
   /** RegularExpression Id. */
-  int DIVIDE = 30;
+  int XOR = 30;
   /** RegularExpression Id. */
-  int MOD = 31;
+  int EQUAL = 31;
   /** RegularExpression Id. */
-  int XOR = 32;
+  int ASSIGN = 32;
   /** RegularExpression Id. */
-  int EQUAL = 33;
+  int NOT_EQUAL = 33;
   /** RegularExpression Id. */
-  int ASSIGN = 34;
+  int COLON = 34;
   /** RegularExpression Id. */
-  int NOT_EQUAL = 35;
+  int COLON_ASSIGN = 35;
   /** RegularExpression Id. */
-  int COLON = 36;
+  int LT = 36;
   /** RegularExpression Id. */
-  int COLON_ASSIGN = 37;
+  int GT = 37;
   /** RegularExpression Id. */
-  int LT = 38;
+  int GTE = 38;
   /** RegularExpression Id. */
-  int GT = 39;
+  int LTE = 39;
   /** RegularExpression Id. */
-  int GTE = 40;
+  int AND = 40;
   /** RegularExpression Id. */
-  int LTE = 41;
+  int OR = 41;
   /** RegularExpression Id. */
-  int AND = 42;
+  int NOT = 42;
   /** RegularExpression Id. */
-  int OR = 43;
+  int LPAREN = 43;
   /** RegularExpression Id. */
-  int NOT = 44;
+  int RPAREN = 44;
   /** RegularExpression Id. */
-  int LPAREN = 45;
+  int LBRACE = 45;
   /** RegularExpression Id. */
-  int RPAREN = 46;
+  int RBRACE = 46;
   /** RegularExpression Id. */
-  int LBRACE = 47;
+  int LBRACKET = 47;
   /** RegularExpression Id. */
-  int RBRACE = 48;
+  int RBRACKET = 48;
   /** RegularExpression Id. */
-  int LBRACKET = 49;
+  int COMMA = 49;
   /** RegularExpression Id. */
-  int RBRACKET = 50;
+  int SEMICOLON = 50;
   /** RegularExpression Id. */
-  int COMMA = 51;
+  int IDENTIFIER = 51;
   /** RegularExpression Id. */
-  int SEMICOLON = 52;
+  int INTEGER = 52;
   /** RegularExpression Id. */
-  int IDENTIFIER = 53;
+  int FLOAT = 53;
   /** RegularExpression Id. */
-  int INTEGER = 54;
-  /** RegularExpression Id. */
-  int FLOAT = 55;
-  /** RegularExpression Id. */
-  int STRING = 56;
+  int STRING = 54;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -130,7 +126,6 @@ public interface GolangParserConstants {
     "\"const\"",
     "\"type\"",
     "\"struct\"",
-    "\"interface\"",
     "\"map\"",
     "\"slice\"",
     "\"range\"",
@@ -141,7 +136,6 @@ public interface GolangParserConstants {
     "\"case\"",
     "\"default\"",
     "\"return\"",
-    "\"chan\"",
     "\".\"",
     "\"+\"",
     "\"-\"",
