@@ -127,6 +127,7 @@ void ImportSpec() : {}
     ( <LPAREN> ImportSpec() (<SEMICOLON>)* <RPAREN> ) | ( <STRING> )
 }
 
+//
 void TopLevelDecl() : {}
 {
     FunctionDecl() | TypeDecl() | VarDecl()
