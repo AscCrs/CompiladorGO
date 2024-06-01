@@ -188,6 +188,9 @@ public class GolangParser implements GolangParserConstants {
       case IF:
       case RETURN:
       case MULTIPLY:
+      case ASSIGN:
+      case COLON_ASSIGN:
+      case LPAREN:
       case LBRACKET:
       case IDENTIFIER:
       case INTEGER:
@@ -210,6 +213,9 @@ public class GolangParser implements GolangParserConstants {
     case STRUCT:
     case MAP:
     case MULTIPLY:
+    case ASSIGN:
+    case COLON_ASSIGN:
+    case LPAREN:
     case LBRACKET:
     case IDENTIFIER:
     case INTEGER:
@@ -255,6 +261,9 @@ public class GolangParser implements GolangParserConstants {
       case STRUCT:
       case MAP:
       case MULTIPLY:
+      case ASSIGN:
+      case COLON_ASSIGN:
+      case LPAREN:
       case LBRACKET:
       case IDENTIFIER:
       case INTEGER:
@@ -392,21 +401,9 @@ public class GolangParser implements GolangParserConstants {
     case DOT:
       RegularStatement();
       break;
-    case FUNC:
-    case STRUCT:
-    case MAP:
-    case MULTIPLY:
-    case LBRACKET:
-    case IDENTIFIER:
-    case INTEGER:
-    case FLOAT:
-    case STRING:
-      Expression();
-      break;
     default:
       jj_la1[23] = jj_gen;
-      jj_consume_token(-1);
-      throw new ParseException();
+      Expression();
     }
   }
 
@@ -554,23 +551,58 @@ public class GolangParser implements GolangParserConstants {
       TypeLit();
       break;
     default:
-      jj_la1[31] = jj_gen;
-      jj_consume_token(-1);
-      throw new ParseException();
+      jj_la1[32] = jj_gen;
+      label_9:
+      while (true) {
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case LPAREN:
+        case IDENTIFIER:
+        case INTEGER:
+        case FLOAT:
+        case STRING:
+          ;
+          break;
+        default:
+          jj_la1[31] = jj_gen;
+          break label_9;
+        }
+        Primary();
+        SimpleExpression();
+        Primary();
+      }
     }
   }
 
-  final public void AssignMulExp() throws ParseException {
-    MulExp();
-    label_9:
+  final public void CallExpression() throws ParseException {
+    jj_consume_token(LPAREN);
+    Expression();
+    label_10:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case COMMA:
         ;
         break;
       default:
-        jj_la1[32] = jj_gen;
-        break label_9;
+        jj_la1[33] = jj_gen;
+        break label_10;
+      }
+      jj_consume_token(COMMA);
+      Expression();
+    }
+    jj_consume_token(RPAREN);
+  }
+
+  final public void AssignMulExp() throws ParseException {
+    MulExp();
+    label_12:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case COMMA:
+        ;
+        break;
+      default:
+        jj_la1[35] = jj_gen;
+        break label_12;
       }
       jj_consume_token(COMMA);
       MulExp();
@@ -592,7 +624,7 @@ public class GolangParser implements GolangParserConstants {
       jj_consume_token(IDENTIFIER);
       break;
     default:
-      jj_la1[33] = jj_gen;
+      jj_la1[36] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -602,6 +634,26 @@ public class GolangParser implements GolangParserConstants {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case IDENTIFIER:
       jj_consume_token(IDENTIFIER);
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case DOT:
+      case LPAREN:
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case DOT:
+          ObjectElement();
+          break;
+        case LPAREN:
+          CallExpression();
+          break;
+        default:
+          jj_la1[37] = jj_gen;
+          jj_consume_token(-1);
+          throw new ParseException();
+        }
+        break;
+      default:
+        jj_la1[38] = jj_gen;
+        ;
+      }
       break;
     case INTEGER:
       jj_consume_token(INTEGER);
@@ -618,7 +670,7 @@ public class GolangParser implements GolangParserConstants {
       jj_consume_token(RPAREN);
       break;
     default:
-      jj_la1[34] = jj_gen;
+      jj_la1[39] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -627,15 +679,15 @@ public class GolangParser implements GolangParserConstants {
   final public void TypeDecl() throws ParseException {
     jj_consume_token(TYPE);
     TypeSpec();
-    label_10:
+    label_13:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case COMMA:
         ;
         break;
       default:
-        jj_la1[35] = jj_gen;
-        break label_10;
+        jj_la1[40] = jj_gen;
+        break label_13;
       }
       jj_consume_token(COMMA);
       TypeSpec();
@@ -645,7 +697,7 @@ public class GolangParser implements GolangParserConstants {
       jj_consume_token(SEMICOLON);
       break;
     default:
-      jj_la1[36] = jj_gen;
+      jj_la1[41] = jj_gen;
       ;
     }
   }
@@ -676,7 +728,7 @@ public class GolangParser implements GolangParserConstants {
       jj_consume_token(RPAREN);
       break;
     default:
-      jj_la1[37] = jj_gen;
+      jj_la1[42] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -697,7 +749,7 @@ public class GolangParser implements GolangParserConstants {
       jj_consume_token(IDENTIFIER);
       break;
     default:
-      jj_la1[38] = jj_gen;
+      jj_la1[43] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -716,7 +768,7 @@ public class GolangParser implements GolangParserConstants {
         ArrayType();
         break;
       default:
-        jj_la1[39] = jj_gen;
+        jj_la1[44] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -734,7 +786,7 @@ public class GolangParser implements GolangParserConstants {
       MapType();
       break;
     default:
-      jj_la1[40] = jj_gen;
+      jj_la1[45] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -758,15 +810,15 @@ public class GolangParser implements GolangParserConstants {
                      System.out.println("Struct");
     jj_consume_token(STRUCT);
     jj_consume_token(LBRACE);
-    label_11:
+    label_14:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case IDENTIFIER:
         ;
         break;
       default:
-        jj_la1[41] = jj_gen;
-        break label_11;
+        jj_la1[46] = jj_gen;
+        break label_14;
       }
       StructDeclaration();
     }
@@ -785,15 +837,15 @@ public class GolangParser implements GolangParserConstants {
 
   final public void IdentifierList() throws ParseException {
     jj_consume_token(IDENTIFIER);
-    label_12:
+    label_15:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case COMMA:
         ;
         break;
       default:
-        jj_la1[42] = jj_gen;
-        break label_12;
+        jj_la1[47] = jj_gen;
+        break label_15;
       }
       jj_consume_token(COMMA);
       jj_consume_token(IDENTIFIER);
@@ -830,7 +882,7 @@ public class GolangParser implements GolangParserConstants {
       jj_consume_token(RBRACE);
       break;
     default:
-      jj_la1[43] = jj_gen;
+      jj_la1[48] = jj_gen;
       ;
     }
   }
@@ -842,7 +894,7 @@ public class GolangParser implements GolangParserConstants {
     jj_consume_token(RBRACKET);
     jj_consume_token(IDENTIFIER);
     jj_consume_token(LBRACE);
-    label_13:
+    label_16:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case IDENTIFIER:
@@ -852,8 +904,8 @@ public class GolangParser implements GolangParserConstants {
         ;
         break;
       default:
-        jj_la1[44] = jj_gen;
-        break label_13;
+        jj_la1[49] = jj_gen;
+        break label_16;
       }
       MapList();
       jj_consume_token(COMMA);
@@ -875,15 +927,15 @@ public class GolangParser implements GolangParserConstants {
       jj_consume_token(IDENTIFIER);
       jj_consume_token(COLON);
       TypeName();
-      label_14:
+      label_17:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case COMMA:
           ;
           break;
         default:
-          jj_la1[45] = jj_gen;
-          break label_14;
+          jj_la1[50] = jj_gen;
+          break label_17;
         }
         jj_consume_token(COMMA);
         jj_consume_token(IDENTIFIER);
@@ -892,7 +944,7 @@ public class GolangParser implements GolangParserConstants {
       }
       break;
     default:
-      jj_la1[46] = jj_gen;
+      jj_la1[51] = jj_gen;
       ;
     }
     jj_consume_token(RBRACE);
@@ -907,22 +959,22 @@ public class GolangParser implements GolangParserConstants {
       jj_consume_token(SEMICOLON);
       break;
     default:
-      jj_la1[47] = jj_gen;
+      jj_la1[52] = jj_gen;
       ;
     }
   }
 
   final public void VarSpec() throws ParseException {
     jj_consume_token(IDENTIFIER);
-    label_15:
+    label_18:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case COMMA:
         ;
         break;
       default:
-        jj_la1[48] = jj_gen;
-        break label_15;
+        jj_la1[53] = jj_gen;
+        break label_18;
       }
       jj_consume_token(COMMA);
       jj_consume_token(IDENTIFIER);
@@ -934,7 +986,7 @@ public class GolangParser implements GolangParserConstants {
       Expression();
       break;
     default:
-      jj_la1[49] = jj_gen;
+      jj_la1[54] = jj_gen;
       ;
     }
   }
@@ -953,379 +1005,471 @@ public class GolangParser implements GolangParserConstants {
     finally { jj_save(1, xla); }
   }
 
-  private boolean jj_3R_34() {
-    if (jj_3R_44()) return true;
-    Token xsp;
-    while (true) {
-      xsp = jj_scanpos;
-      if (jj_3R_45()) { jj_scanpos = xsp; break; }
-    }
-    return false;
-  }
-
-  private boolean jj_3R_80() {
-    if (jj_scan_token(LPAREN)) return true;
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_84()) jj_scanpos = xsp;
-    if (jj_scan_token(RPAREN)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_43() {
+  private boolean jj_3R_41() {
     if (jj_3R_54()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_44() {
     Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_55()) {
-    jj_scanpos = xsp;
-    if (jj_scan_token(54)) {
-    jj_scanpos = xsp;
-    if (jj_3R_56()) return true;
-    }
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3R_55()) { jj_scanpos = xsp; break; }
     }
     return false;
   }
 
-  private boolean jj_3R_55() {
-    if (jj_scan_token(IDENTIFIER)) return true;
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_64()) jj_scanpos = xsp;
-    return false;
-  }
-
-  private boolean jj_3_1() {
-    if (jj_3R_16()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_28() {
+  private boolean jj_3R_97() {
     if (jj_scan_token(LPAREN)) return true;
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_3R_34()) jj_scanpos = xsp;
+    if (jj_3R_101()) jj_scanpos = xsp;
     if (jj_scan_token(RPAREN)) return true;
     return false;
   }
 
-  private boolean jj_3R_35() {
+  private boolean jj_3R_42() {
     if (jj_scan_token(IDENTIFIER)) return true;
     Token xsp;
     while (true) {
       xsp = jj_scanpos;
-      if (jj_3R_46()) { jj_scanpos = xsp; break; }
+      if (jj_3R_56()) { jj_scanpos = xsp; break; }
     }
-    if (jj_3R_47()) return true;
+    if (jj_3R_57()) return true;
     xsp = jj_scanpos;
-    if (jj_3R_48()) jj_scanpos = xsp;
+    if (jj_3R_58()) jj_scanpos = xsp;
     return false;
   }
 
-  private boolean jj_3R_66() {
+  private boolean jj_3R_81() {
     if (jj_scan_token(LBRACE)) return true;
-    if (jj_3R_31()) return true;
+    if (jj_3R_36()) return true;
     if (jj_scan_token(RBRACE)) return true;
     return false;
   }
 
-  private boolean jj_3R_22() {
-    if (jj_scan_token(DOT)) return true;
+  private boolean jj_3R_54() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_69()) {
+    jj_scanpos = xsp;
+    if (jj_scan_token(54)) {
+    jj_scanpos = xsp;
+    if (jj_3R_70()) return true;
+    }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_69() {
     if (jj_scan_token(IDENTIFIER)) return true;
-    if (jj_3R_28()) return true;
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_scan_token(50)) jj_scanpos = xsp;
+    if (jj_3R_79()) jj_scanpos = xsp;
     return false;
   }
 
-  private boolean jj_3R_30() {
+  private boolean jj_3R_35() {
     if (jj_scan_token(VAR)) return true;
-    if (jj_3R_35()) return true;
+    if (jj_3R_42()) return true;
     Token xsp;
     xsp = jj_scanpos;
     if (jj_scan_token(50)) jj_scanpos = xsp;
     return false;
   }
 
-  private boolean jj_3R_20() {
+  private boolean jj_3_1() {
+    if (jj_3R_19()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_33() {
+    if (jj_scan_token(LPAREN)) return true;
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_3R_23()) {
-    jj_scanpos = xsp;
-    if (jj_3R_24()) {
-    jj_scanpos = xsp;
-    if (jj_3R_25()) return true;
-    }
-    }
+    if (jj_3R_41()) jj_scanpos = xsp;
+    if (jj_scan_token(RPAREN)) return true;
     return false;
   }
 
-  private boolean jj_3R_23() {
-    if (jj_3R_16()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_72() {
-    if (jj_3R_47()) return true;
+  private boolean jj_3R_87() {
+    if (jj_3R_57()) return true;
     if (jj_scan_token(COLON)) return true;
     if (jj_scan_token(IDENTIFIER)) return true;
     if (jj_scan_token(LBRACE)) return true;
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_3R_79()) jj_scanpos = xsp;
+    if (jj_3R_96()) jj_scanpos = xsp;
     if (jj_scan_token(RBRACE)) return true;
     return false;
   }
 
-  private boolean jj_3R_42() {
-    if (jj_3R_53()) return true;
+  private boolean jj_3R_49() {
+    if (jj_3R_63()) return true;
     return false;
   }
 
-  private boolean jj_3R_71() {
-    if (jj_3R_47()) return true;
+  private boolean jj_3R_25() {
+    if (jj_scan_token(DOT)) return true;
+    if (jj_scan_token(IDENTIFIER)) return true;
+    if (jj_3R_33()) return true;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_scan_token(50)) jj_scanpos = xsp;
     return false;
   }
 
-  private boolean jj_3R_62() {
-    if (jj_3R_69()) return true;
+  private boolean jj_3R_76() {
+    if (jj_3R_84()) return true;
     return false;
   }
 
-  private boolean jj_3R_54() {
+  private boolean jj_3R_23() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_26()) {
+    jj_scanpos = xsp;
+    if (jj_3R_27()) {
+    jj_scanpos = xsp;
+    if (jj_3R_28()) return true;
+    }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_26() {
+    if (jj_3R_19()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_64() {
     if (jj_scan_token(MAP)) return true;
     if (jj_scan_token(LBRACKET)) return true;
-    if (jj_3R_62()) return true;
+    if (jj_3R_76()) return true;
     if (jj_scan_token(RBRACKET)) return true;
     if (jj_scan_token(IDENTIFIER)) return true;
     if (jj_scan_token(LBRACE)) return true;
     Token xsp;
     while (true) {
       xsp = jj_scanpos;
-      if (jj_3R_63()) { jj_scanpos = xsp; break; }
+      if (jj_3R_77()) { jj_scanpos = xsp; break; }
     }
     if (jj_scan_token(RBRACE)) return true;
     return false;
   }
 
-  private boolean jj_3R_82() {
-    if (jj_scan_token(COMMA)) return true;
-    if (jj_3R_81()) return true;
+  private boolean jj_3R_86() {
+    if (jj_3R_57()) return true;
     return false;
   }
 
-  private boolean jj_3R_57() {
+  private boolean jj_3R_32() {
+    if (jj_3R_40()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_71() {
     if (jj_scan_token(RBRACKET)) return true;
-    if (jj_3R_47()) return true;
+    if (jj_3R_57()) return true;
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_3R_66()) jj_scanpos = xsp;
+    if (jj_3R_81()) jj_scanpos = xsp;
     return false;
   }
 
-  private boolean jj_3R_41() {
-    if (jj_3R_52()) return true;
+  private boolean jj_3R_48() {
+    if (jj_3R_62()) return true;
     return false;
   }
 
-  private boolean jj_3R_53() {
+  private boolean jj_3R_99() {
+    if (jj_scan_token(COMMA)) return true;
+    if (jj_3R_98()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_63() {
     if (jj_scan_token(FUNC)) return true;
+    if (jj_3R_75()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_74() {
+    if (jj_3R_84()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_47() {
     if (jj_3R_61()) return true;
     return false;
   }
 
-  private boolean jj_3R_81() {
+  private boolean jj_3R_62() {
+    if (jj_scan_token(MULTIPLY)) return true;
+    if (jj_3R_74()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_73() {
+    if (jj_3R_83()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_98() {
     if (jj_scan_token(IDENTIFIER)) return true;
-    if (jj_3R_47()) return true;
+    if (jj_3R_57()) return true;
     return false;
   }
 
-  private boolean jj_3R_60() {
-    if (jj_3R_69()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_40() {
-    if (jj_3R_51()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_78() {
-    if (jj_3R_81()) return true;
+  private boolean jj_3R_95() {
+    if (jj_3R_98()) return true;
     Token xsp;
     while (true) {
       xsp = jj_scanpos;
-      if (jj_3R_82()) { jj_scanpos = xsp; break; }
+      if (jj_3R_99()) { jj_scanpos = xsp; break; }
     }
     return false;
   }
 
-  private boolean jj_3R_70() {
+  private boolean jj_3R_85() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_95()) jj_scanpos = xsp;
+    return false;
+  }
+
+  private boolean jj_3R_60() {
+    if (jj_3R_72()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_75() {
+    if (jj_scan_token(LPAREN)) return true;
+    if (jj_3R_85()) return true;
+    if (jj_scan_token(RPAREN)) return true;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_86()) jj_scanpos = xsp;
+    return false;
+  }
+
+  private boolean jj_3R_83() {
+    if (jj_scan_token(IDENTIFIER)) return true;
+    if (jj_3R_57()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_61() {
+    if (jj_scan_token(STRUCT)) return true;
+    if (jj_scan_token(LBRACE)) return true;
+    Token xsp;
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3R_73()) { jj_scanpos = xsp; break; }
+    }
+    if (jj_scan_token(RBRACE)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_68() {
+    if (jj_scan_token(COMMA)) return true;
+    if (jj_3R_51()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_39() {
+    if (jj_3R_51()) return true;
+    if (jj_3R_45()) return true;
+    if (jj_3R_51()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_31() {
+    Token xsp;
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3R_39()) { jj_scanpos = xsp; break; }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_94() {
+    if (jj_scan_token(LPAREN)) return true;
+    if (jj_3R_84()) return true;
+    if (jj_scan_token(RPAREN)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_82() {
+    if (jj_3R_84()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_59() {
+    if (jj_3R_71()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_53() {
+    if (jj_3R_51()) return true;
+    Token xsp;
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3R_68()) { jj_scanpos = xsp; break; }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_30() {
+    if (jj_3R_38()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_72() {
+    if (jj_scan_token(52)) return true;
+    if (jj_scan_token(RBRACKET)) return true;
+    if (jj_3R_82()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_93() {
+    if (jj_3R_38()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_89() {
+    if (jj_3R_40()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_46() {
+    if (jj_scan_token(LBRACKET)) return true;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_59()) {
+    jj_scanpos = xsp;
+    if (jj_3R_60()) return true;
+    }
+    return false;
+  }
+
+  private boolean jj_3R_38() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_46()) {
+    jj_scanpos = xsp;
+    if (jj_3R_47()) {
+    jj_scanpos = xsp;
+    if (jj_3R_48()) {
+    jj_scanpos = xsp;
+    if (jj_3R_49()) {
+    jj_scanpos = xsp;
+    if (jj_3R_50()) return true;
+    }
+    }
+    }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_57() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_scan_token(54)) {
+    jj_scanpos = xsp;
+    if (jj_scan_token(52)) {
+    jj_scanpos = xsp;
+    if (jj_scan_token(53)) {
+    jj_scanpos = xsp;
+    if (jj_scan_token(51)) return true;
+    }
+    }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_92() {
+    if (jj_3R_57()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_84() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_92()) {
+    jj_scanpos = xsp;
+    if (jj_3R_93()) {
+    jj_scanpos = xsp;
+    if (jj_3R_94()) return true;
+    }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_88() {
+    if (jj_3R_80()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_78() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_88()) {
+    jj_scanpos = xsp;
+    if (jj_3R_89()) return true;
+    }
+    return false;
+  }
+
+  private boolean jj_3R_67() {
+    if (jj_scan_token(COMMA)) return true;
+    if (jj_3R_24()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_66() {
+    if (jj_scan_token(LPAREN)) return true;
+    if (jj_3R_24()) return true;
+    if (jj_scan_token(RPAREN)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_44() {
+    if (jj_scan_token(COMMA)) return true;
+    if (jj_3R_43()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_51() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_65()) {
+    jj_scanpos = xsp;
+    if (jj_scan_token(52)) {
+    jj_scanpos = xsp;
+    if (jj_scan_token(53)) {
+    jj_scanpos = xsp;
+    if (jj_scan_token(54)) {
+    jj_scanpos = xsp;
+    if (jj_3R_66()) return true;
+    }
+    }
+    }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_65() {
+    if (jj_scan_token(IDENTIFIER)) return true;
     Token xsp;
     xsp = jj_scanpos;
     if (jj_3R_78()) jj_scanpos = xsp;
     return false;
   }
 
-  private boolean jj_3R_52() {
-    if (jj_scan_token(MULTIPLY)) return true;
-    if (jj_3R_60()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_59() {
-    if (jj_3R_68()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_61() {
-    if (jj_scan_token(LPAREN)) return true;
-    if (jj_3R_70()) return true;
-    if (jj_scan_token(RPAREN)) return true;
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_71()) jj_scanpos = xsp;
-    return false;
-  }
-
-  private boolean jj_3R_50() {
-    if (jj_3R_58()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_68() {
-    if (jj_scan_token(IDENTIFIER)) return true;
-    if (jj_3R_47()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_51() {
-    if (jj_scan_token(STRUCT)) return true;
-    if (jj_scan_token(LBRACE)) return true;
-    Token xsp;
-    while (true) {
-      xsp = jj_scanpos;
-      if (jj_3R_59()) { jj_scanpos = xsp; break; }
-    }
-    if (jj_scan_token(RBRACE)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_27() {
-    if (jj_3R_33()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_77() {
-    if (jj_scan_token(LPAREN)) return true;
-    if (jj_3R_69()) return true;
-    if (jj_scan_token(RPAREN)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_67() {
-    if (jj_3R_69()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_49() {
-    if (jj_3R_57()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_58() {
-    if (jj_scan_token(52)) return true;
-    if (jj_scan_token(RBRACKET)) return true;
-    if (jj_3R_67()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_76() {
-    if (jj_3R_33()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_39() {
-    if (jj_scan_token(LBRACKET)) return true;
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_49()) {
-    jj_scanpos = xsp;
-    if (jj_3R_50()) return true;
-    }
-    return false;
-  }
-
-  private boolean jj_3R_33() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_39()) {
-    jj_scanpos = xsp;
-    if (jj_3R_40()) {
-    jj_scanpos = xsp;
-    if (jj_3R_41()) {
-    jj_scanpos = xsp;
-    if (jj_3R_42()) {
-    jj_scanpos = xsp;
-    if (jj_3R_43()) return true;
-    }
-    }
-    }
-    }
-    return false;
-  }
-
-  private boolean jj_3R_47() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_scan_token(54)) {
-    jj_scanpos = xsp;
-    if (jj_scan_token(52)) {
-    jj_scanpos = xsp;
-    if (jj_scan_token(53)) {
-    jj_scanpos = xsp;
-    if (jj_scan_token(51)) return true;
-    }
-    }
-    }
-    return false;
-  }
-
-  private boolean jj_3R_75() {
-    if (jj_3R_47()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_69() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_75()) {
-    jj_scanpos = xsp;
-    if (jj_3R_76()) {
-    jj_scanpos = xsp;
-    if (jj_3R_77()) return true;
-    }
-    }
-    return false;
-  }
-
-  private boolean jj_3R_32() {
-    if (jj_3R_38()) return true;
-    if (jj_3R_31()) return true;
-    return false;
-  }
-
   private boolean jj_3R_37() {
-    if (jj_scan_token(COMMA)) return true;
+    if (jj_3R_45()) return true;
     if (jj_3R_36()) return true;
     return false;
   }
 
-  private boolean jj_3R_36() {
+  private boolean jj_3R_43() {
     Token xsp;
     xsp = jj_scanpos;
     if (jj_scan_token(52)) {
@@ -1341,7 +1485,68 @@ public class GolangParser implements GolangParserConstants {
     return false;
   }
 
-  private boolean jj_3R_31() {
+  private boolean jj_3R_52() {
+    if (jj_3R_24()) return true;
+    Token xsp;
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3R_67()) { jj_scanpos = xsp; break; }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_36() {
+    if (jj_3R_43()) return true;
+    Token xsp;
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3R_44()) { jj_scanpos = xsp; break; }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_100() {
+    if (jj_scan_token(COMMA)) return true;
+    if (jj_scan_token(IDENTIFIER)) return true;
+    if (jj_scan_token(COLON)) return true;
+    if (jj_3R_57()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_40() {
+    if (jj_scan_token(LPAREN)) return true;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_52()) {
+    jj_scanpos = xsp;
+    if (jj_3R_53()) return true;
+    }
+    if (jj_scan_token(RPAREN)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_70() {
+    if (jj_3R_80()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_24() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_29()) {
+    jj_scanpos = xsp;
+    if (jj_3R_30()) {
+    jj_scanpos = xsp;
+    if (jj_3R_31()) {
+    jj_scanpos = xsp;
+    if (jj_3R_32()) return true;
+    }
+    }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_29() {
     if (jj_3R_36()) return true;
     Token xsp;
     while (true) {
@@ -1351,40 +1556,7 @@ public class GolangParser implements GolangParserConstants {
     return false;
   }
 
-  private boolean jj_3R_56() {
-    if (jj_3R_65()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_21() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_26()) {
-    jj_scanpos = xsp;
-    if (jj_3R_27()) return true;
-    }
-    return false;
-  }
-
-  private boolean jj_3R_26() {
-    if (jj_3R_31()) return true;
-    Token xsp;
-    while (true) {
-      xsp = jj_scanpos;
-      if (jj_3R_32()) { jj_scanpos = xsp; break; }
-    }
-    return false;
-  }
-
-  private boolean jj_3R_83() {
-    if (jj_scan_token(COMMA)) return true;
-    if (jj_scan_token(IDENTIFIER)) return true;
-    if (jj_scan_token(COLON)) return true;
-    if (jj_3R_47()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_38() {
+  private boolean jj_3R_45() {
     Token xsp;
     xsp = jj_scanpos;
     if (jj_scan_token(25)) {
@@ -1403,138 +1575,143 @@ public class GolangParser implements GolangParserConstants {
     return false;
   }
 
-  private boolean jj_3_2() {
-    if (jj_3R_17()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_19() {
-    if (jj_3R_21()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_25() {
-    if (jj_3R_30()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_17() {
-    if (jj_3R_20()) return true;
-    if (jj_scan_token(SEMICOLON)) return true;
-    if (jj_3R_21()) return true;
-    if (jj_scan_token(SEMICOLON)) return true;
-    if (jj_3R_20()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_48() {
+  private boolean jj_3R_58() {
     if (jj_scan_token(ASSIGN)) return true;
-    if (jj_3R_21()) return true;
+    if (jj_3R_24()) return true;
     return false;
   }
 
-  private boolean jj_3R_85() {
+  private boolean jj_3_2() {
+    if (jj_3R_20()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_22() {
+    if (jj_3R_24()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_28() {
+    if (jj_3R_35()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_20() {
+    if (jj_3R_23()) return true;
+    if (jj_scan_token(SEMICOLON)) return true;
+    if (jj_3R_24()) return true;
+    if (jj_scan_token(SEMICOLON)) return true;
+    if (jj_3R_23()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_77() {
+    if (jj_3R_87()) return true;
     if (jj_scan_token(COMMA)) return true;
-    if (jj_3R_44()) return true;
     return false;
   }
 
-  private boolean jj_3R_63() {
-    if (jj_3R_72()) return true;
+  private boolean jj_3R_102() {
     if (jj_scan_token(COMMA)) return true;
+    if (jj_3R_54()) return true;
     return false;
   }
 
-  private boolean jj_3R_45() {
-    if (jj_scan_token(COMMA)) return true;
-    if (jj_3R_44()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_24() {
-    if (jj_3R_29()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_74() {
-    if (jj_3R_80()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_18() {
-    if (jj_3R_22()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_79() {
+  private boolean jj_3R_96() {
     if (jj_scan_token(IDENTIFIER)) return true;
     if (jj_scan_token(COLON)) return true;
-    if (jj_3R_47()) return true;
+    if (jj_3R_57()) return true;
     Token xsp;
     while (true) {
       xsp = jj_scanpos;
-      if (jj_3R_83()) { jj_scanpos = xsp; break; }
+      if (jj_3R_100()) { jj_scanpos = xsp; break; }
     }
     return false;
   }
 
-  private boolean jj_3R_29() {
-    if (jj_3R_21()) return true;
+  private boolean jj_3R_55() {
+    if (jj_scan_token(COMMA)) return true;
+    if (jj_3R_54()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_91() {
+    if (jj_3R_97()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_27() {
+    if (jj_3R_34()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_21() {
+    if (jj_3R_25()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_34() {
+    if (jj_3R_24()) return true;
     Token xsp;
     xsp = jj_scanpos;
     if (jj_scan_token(32)) {
     jj_scanpos = xsp;
     if (jj_scan_token(35)) return true;
     }
-    if (jj_3R_21()) return true;
+    if (jj_3R_24()) return true;
     return false;
   }
 
-  private boolean jj_3R_84() {
-    if (jj_3R_44()) return true;
+  private boolean jj_3R_56() {
+    if (jj_scan_token(COMMA)) return true;
+    if (jj_scan_token(IDENTIFIER)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_101() {
+    if (jj_3R_54()) return true;
     Token xsp;
     while (true) {
       xsp = jj_scanpos;
-      if (jj_3R_85()) { jj_scanpos = xsp; break; }
+      if (jj_3R_102()) { jj_scanpos = xsp; break; }
     }
     return false;
   }
 
-  private boolean jj_3R_16() {
+  private boolean jj_3R_19() {
     if (jj_scan_token(IDENTIFIER)) return true;
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_3R_18()) {
+    if (jj_3R_21()) {
     jj_scanpos = xsp;
-    if (jj_3R_19()) return true;
+    if (jj_3R_22()) return true;
     }
     return false;
   }
 
-  private boolean jj_3R_64() {
+  private boolean jj_3R_90() {
+    if (jj_3R_80()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_79() {
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_3R_73()) {
+    if (jj_3R_90()) {
     jj_scanpos = xsp;
-    if (jj_3R_74()) return true;
+    if (jj_3R_91()) return true;
     }
     return false;
   }
 
-  private boolean jj_3R_73() {
-    if (jj_3R_65()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_65() {
+  private boolean jj_3R_80() {
     if (jj_scan_token(DOT)) return true;
     if (jj_scan_token(IDENTIFIER)) return true;
     return false;
   }
 
-  private boolean jj_3R_46() {
-    if (jj_scan_token(COMMA)) return true;
-    if (jj_scan_token(IDENTIFIER)) return true;
+  private boolean jj_3R_50() {
+    if (jj_3R_64()) return true;
     return false;
   }
 
@@ -1552,7 +1729,7 @@ public class GolangParser implements GolangParserConstants {
   private boolean jj_lookingAhead = false;
   private boolean jj_semLA;
   private int jj_gen;
-  final private int[] jj_la1 = new int[50];
+  final private int[] jj_la1 = new int[55];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static {
@@ -1560,10 +1737,10 @@ public class GolangParser implements GolangParserConstants {
       jj_la1_init_1();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x100,0x80,0x1600,0x0,0x0,0x0,0x0,0x1600,0x0,0x0,0x0,0x8866600,0x8866600,0x60000,0x8006600,0x0,0x0,0x1000000,0x1000000,0x1000000,0x1000000,0x0,0x1000000,0x9006200,0x0,0x0,0x80000,0x0,0x0,0x3e000000,0x3e000000,0x8006200,0x0,0x0,0x0,0x0,0x0,0x8006200,0x0,0x0,0x8006200,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
+      jj_la1_0 = new int[] {0x100,0x80,0x1600,0x0,0x0,0x0,0x0,0x1600,0x0,0x0,0x0,0x8866600,0x8866600,0x60000,0x8006600,0x0,0x0,0x1000000,0x1000000,0x1000000,0x1000000,0x0,0x1000000,0x1000000,0x0,0x0,0x80000,0x0,0x0,0x3e000000,0x3e000000,0x0,0x8006200,0x0,0x0,0x0,0x0,0x1000000,0x1000000,0x0,0x0,0x0,0x8006200,0x0,0x0,0x8006200,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0x0,0x0,0x0,0x40000,0x20000,0x40000,0x400800,0x0,0x780000,0x20000,0x80000,0x788000,0x788000,0x0,0x788000,0x40000,0x20000,0x480000,0x800,0x800,0x480000,0x20000,0x480000,0x788000,0x9,0x40000,0x0,0x80000,0x20000,0x0,0x0,0x788000,0x20000,0x780000,0x780800,0x20000,0x40000,0x788800,0x780000,0x110000,0x8000,0x80000,0x20000,0x2000,0x780000,0x20000,0x80000,0x40000,0x20000,0x1,};
+      jj_la1_1 = new int[] {0x0,0x0,0x0,0x40000,0x20000,0x40000,0x400800,0x0,0x780000,0x20000,0x80000,0x788809,0x788809,0x0,0x788809,0x40000,0x20000,0x480000,0x800,0x800,0x480000,0x20000,0x480000,0x0,0x9,0x40000,0x0,0x80000,0x20000,0x0,0x0,0x780800,0x788000,0x20000,0x20000,0x20000,0x780000,0x800,0x800,0x780800,0x20000,0x40000,0x788800,0x780000,0x110000,0x8000,0x80000,0x20000,0x2000,0x780000,0x20000,0x80000,0x40000,0x20000,0x1,};
    }
   final private JJCalls[] jj_2_rtns = new JJCalls[2];
   private boolean jj_rescan = false;
@@ -1580,7 +1757,7 @@ public class GolangParser implements GolangParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 50; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 55; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1595,7 +1772,7 @@ public class GolangParser implements GolangParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 50; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 55; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1606,7 +1783,7 @@ public class GolangParser implements GolangParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 50; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 55; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1617,7 +1794,7 @@ public class GolangParser implements GolangParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 50; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 55; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1627,7 +1804,7 @@ public class GolangParser implements GolangParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 50; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 55; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1637,7 +1814,7 @@ public class GolangParser implements GolangParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 50; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 55; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1757,7 +1934,7 @@ public class GolangParser implements GolangParserConstants {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 50; i++) {
+    for (int i = 0; i < 55; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {
