@@ -235,7 +235,12 @@ void SimpleExpression(): {}
 
 void Expression() : {}
 {
-    (AssignMulExp() (SimpleExpression() AssignMulExp())*) | TypeLit()
+    AssignMulExp() (SimpleExpression() AssignMulExp())* | TypeLit() | (Primary() SimpleExpression() Primary())* | CallExpression()
+}
+
+void CallExpression() : {}
+{
+    <LPAREN> ((Expression() (<COMMA> Expression())*) | (Primary() (<COMMA> Primary())*)) <RPAREN>
 }
 
 void AssignMulExp() : {}
@@ -250,7 +255,11 @@ void MulExp() : {}
 
 void Primary() : {}
 {
-    <IDENTIFIER> | <INTEGER> | <FLOAT> | <STRING> | <LPAREN> Expression() <RPAREN>
+    <IDENTIFIER> (ObjectElement() | CallExpression())? 
+    | <INTEGER> 
+    | <FLOAT> 
+    | <STRING> 
+    | <LPAREN> Expression() <RPAREN>
 }
 
 void TypeDecl() : {}
