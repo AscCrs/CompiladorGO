@@ -34,7 +34,8 @@ func main() {
    }
 
    // Función recursiva
-   fmt.Println("Factorial de 5:", factorial(5))
+   fmt.Println("Factorial de 5:")
+   fmt.Println(factorial(5))
 }
 
 func factorial(n int) int {
