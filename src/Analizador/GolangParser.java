@@ -442,7 +442,6 @@ public class GolangParser implements GolangParserConstants {
       Operator();
       Expression();
     }
-    jj_consume_token(RPAREN);
   }
 
   final public void IfStatement() throws ParseException {
