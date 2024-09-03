@@ -11,8 +11,8 @@ public class App {
      */
     public static void main(String[] args) {
         try {
-            GolangParser parser = new GolangParser(new BufferedReader(new FileReader("./entrada.go")));
-            parser.CompilationUnit();
+            GolangParser parser = new GolangParser(new BufferedReader(new FileReader("./test.go")));
+            parser.Start();
             System.out.println("Parsing completed successfully.");
         } catch (ParseException e) {
             System.err.println("Token Error: " + e.getMessage());
