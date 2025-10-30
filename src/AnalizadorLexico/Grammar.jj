@@ -1,0 +1,122 @@
+options {
+    IGNORE_CASE = true;
+    STATIC = false;
+    BUILD_PARSER = false; 
+}
+
+PARSER_BEGIN(GolangLexer)
+
+package AnalizadorLexico;
+
+public class GolangLexer { }
+
+PARSER_END(GolangLexer)
+
+// -------------------------------------------------------
+// ------------------ ESPACIOS Y COMENTARIOS --------------
+// -------------------------------------------------------
+
+SKIP : {
+    " " | "\t" | "\r" | "\n"
+  | <"//" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>
+  | <"/*" (~["*"])* "*" ("*" | ~["*","/"] (~["*"])* "*")* "/">
+}
+
+// -------------------------------------------------------
+// ------------------- PALABRAS RESERVADAS ----------------
+// -------------------------------------------------------
+
+TOKEN : { 
+    < IMPORT : "import" >
+|   < PACKAGE : "package" >
+|   < FUNC : "func" >
+|   < VAR : "var" >
+|   < CONST : "const" >
+|   < TYPE : "type" >
+|   < STRUCT : "struct" >
+|   < MAP : "map" >
+|   < SLICE : "slice" >
+|   < RANGE : "range" >
+|   < FOR : "for" >
+|   < IF : "if" >
+|   < ELSE : "else" >
+|   < SWITCH : "switch" >
+|   < CASE : "case" >
+|   < DEF : "default" >
+|   < RETURN : "return" >
+|   < FMT : "fmt" >
+|   < PRINTLN : "Println" >
+|   < PRINT : "Print" >
+}
+
+// -------------------------------------------------------
+// ---------------------- OPERADORES ----------------------
+// -------------------------------------------------------
+
+TOKEN : {
+    < DOT : "." >
+|   < PLUS : "+" >
+|   < MINUS : "-" >
+|   < MULTIPLY : "*" >
+|   < DIVIDE : "/" >
+|   < MOD : "%" >
+|   < XOR : "^" >
+|   < EQUAL : "==" >
+|   < ASSIGN : "=" >
+|   < NOT_EQUAL : "!=" >
+|   < COLON : ":" >
+|   < COLON_ASSIGN : ":=" >
+|   < LT : "<" >
+|   < GT : ">" >
+|   < GTE : ">=" >
+|   < LTE : "<=" >
+|   < AND : "&&" >
+|   < OR : "||" >
+|   < NOT : "!" >
+}
+
+// -------------------------------------------------------
+// --------------------- DELIMITADORES --------------------
+// -------------------------------------------------------
+
+TOKEN : {
+    < LPAREN : "(" >
+|   < RPAREN : ")" >
+|   < LBRACE : "{" >
+|   < RBRACE : "}" >
+|   < LBRACKET : "[" >
+|   < RBRACKET : "]" >
+|   < COMMA : "," >
+|   < SEMICOLON : ";" >
+}
+
+// -------------------------------------------------------
+// ---------------- IDENTIFICADORES Y LITERALES ------------
+// -------------------------------------------------------
+
+TOKEN : { 
+    < IDENTIFIER : (["a"-"z", "A"-"Z", "_"]) (["a"-"z", "A"-"Z", "0"-"9", "_"])* >
+|   < INTEGER : (["0"-"9"])+ >
+|   < FLOAT : (["0"-"9"])+ "." (["0"-"9"])* >
+|   < STRING : 
+          "\"" ( ~["\"","\\","\n","\r"] 
+        | "\\" ( ["n","t","b","r","f","\\","\'","\""] 
+        | ["0"-"7"] (["0"-"7"])?  
+        | ["0"-"3"] ["0"-"7"] ["0"-"7"] 
+        | ( ["\n","\r"] 
+        | "\r\n")))* "\""
+    >
+}
+
+// -------------------------------------------------------
+// ---------------------- ERRORES LÉXICOS -----------------
+// -------------------------------------------------------
+
+// Cualquier carácter no reconocido genera error
+TOKEN : {
+    < INVALID : ~[] >
+    {
+        throw new TokenMgrError("Caracter no reconocido: '" + matchedToken.image + "'", 
+        TokenMgrError.LEXICAL_ERROR);
+    }
+}
