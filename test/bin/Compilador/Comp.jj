@@ -1,0 +1,359 @@
+options {
+    IGNORE_CASE = true;
+    STATIC = false;
+    BUILD_PARSER = true;
+    FORCE_LA_CHECK = true;
+    LOOKAHEAD = 2;
+  }
+  
+  PARSER_BEGIN(GolangParser)
+  
+  package Analizador;
+  import java.io.*;
+  public class GolangParser { }
+  
+  PARSER_END(GolangParser)
+  
+  SKIP : {
+      " "
+    | "\t"
+    | "\r"
+    | "\n"
+    |  <"//" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>
+    |  <"/*" (~["*"])* "*" ("*" | ~["*","/"] (~["*"])* "*")* "/">
+  }
+  
+  // Palabras reservadas
+  TOKEN : { 
+      < IMPORT : "import" >
+  |   < PACKAGE : "package" >
+  |   < FUNC : "func" >
+  |   < VAR : "var" >
+  |   < CONST : "const" >
+  |   < TYPE : "type" >
+  |   < STRUCT : "struct" >
+  |   < INTERFACE : "interface" >
+  |   < MAP : "map" >
+  |   < SLICE : "slice" >
+  |   < RANGE : "range" >
+  |   < FOR : "for" >
+  |   < IF : "if" >
+  |   < ELSE : "else" >
+  |   < SWITCH : "switch" >
+  |   < CASE : "case" >
+  |   < DEF : "default" >
+  |   < RETURN : "return" >
+  }
+  
+  // Operadores
+  TOKEN : {
+      < DOT : "." >
+  |   < PLUS : "+" >
+  |   < MINUS : "-" >
+  |   < MULTIPLY : "*" >
+  |   < DIVIDE : "/" >
+  |   < MOD : "%" >
+  |   < XOR : "^" >
+  |   < EQUAL : "==" >
+  |   < ASSIGN : "=" >
+  |   < NOT_EQUAL : "!=" >
+  |   < COLON : ":" >
+  |   < COLON_ASSIGN : ":=" >
+  |   < LT : "<" >
+  |   < GT : ">" >
+  |   < GTE : ">=" >
+  |   < LTE : "<=" >
+  |   < AND : "&&" >
+  |   < OR : "||" >
+  |   < NOT : "!" >
+  }
+  
+  // Delimitadores
+  TOKEN : {
+      < LPAREN : "(" >
+  |   < RPAREN : ")" >
+  |   < LBRACE : "{" >
+  |   < RBRACE : "}" >
+  |   < LBRACKET : "[" >
+  |   < RBRACKET : "]" >
+  |   < COMMA : "," >
+  |   < SEMICOLON : ";" >
+  }
+  
+  // Identificadores y literales
+  TOKEN : { 
+      < IDENTIFIER : (["a"-"z", "A"-"Z", "_"]) (["a"-"z", "A"-"Z", "0"-"9", "_"])* >
+  |   < INTEGER : (["0"-"9"])+ >
+  |   < FLOAT : (["0"-"9"])+ "." (["0"-"9"])* >
+  |   < STRING : 
+            "\"" ( ~["\"","\\","\n","\r"] 
+          | "\\" ( ["n","t","b","r","f","\\","\'","\""] 
+          | ["0"-"7"] (["0"-"7"])?  
+          | ["0"-"3"] ["0"-"7"] ["0"-"7"] 
+          | ( ["\n","\r"] 
+          | "\r\n")))* "\""
+      >
+  }
+  
+  // Reglas
+  void CompilationUnit() : {}
+  {
+      ( PackageDeclaration() )? ( ImportDeclaration() )* ( TopLevelDeclaration() )* <EOF>
+  }
+  
+  void PackageDeclaration() : {}
+  {
+      <PACKAGE> <IDENTIFIER> (<SEMICOLON>)?
+  }
+  
+  void ImportDeclaration() : {}
+  {
+      <IMPORT> (<STRING> (<SEMICOLON>) | <LPAREN> <STRING> ( <COMMA> <STRING> )* <RPAREN> (<SEMICOLON>)?)
+  }
+  
+  void TopLevelDeclaration() : {}
+  {
+      FunctionDecl() | TypeDecl() | VarDecl()
+  }
+  
+  void FunctionDecl() : {}
+  {
+      <FUNC> <IDENTIFIER> Signature() FunctionBody()
+  }
+  
+  void Signature() : {}
+  {
+      <LPAREN> ParameterList() <RPAREN> ( TypeName() )?
+  }
+  
+  void ParameterList() : {}
+  {
+      ( ParameterDecl() ( <COMMA> ParameterDecl() )* )?
+  }
+  
+  void ParameterDecl() : {}
+  {
+      <IDENTIFIER> TypeName()
+  }
+  
+  void FunctionBody() : {}
+  {
+      Block()
+  }
+  
+  void Block() : {}
+  {
+      <LBRACE> StatementList() <RBRACE>
+  }
+  
+  void StatementList() : {}
+  {
+      ( Statement() )*
+  }
+  
+  void Statement() : {}
+  {
+      SimpleStmt() | ReturnStmt() | ControlStatement()
+  }
+  
+  void ControlStatement() : {}
+  {
+      IfStmt() | ForStmt()
+  }
+  
+  void SimpleStmt() : {}
+  {
+      ExpressionStmt() | Assignment() | VarDecl()
+  }
+  
+  void RegularStatement() : {}
+  {
+      <DOT> <IDENTIFIER> RegularParamStmt() ( <SEMICOLON> )?
+  }
+  
+  void RegularParamStmt() : {}
+  {
+      ( <LPAREN> ( RegularExpressionStmt() ( <COMMA> RegularExpressionStmt() )* )? <RPAREN> )
+  }
+  
+  void RegularExpressionStmt() : {} 
+  {
+      <IDENTIFIER> (ObjectElement())? | <STRING> | ObjectElement()
+  }
+  
+  void ObjectElement() : {} 
+  {
+      <DOT> <IDENTIFIER>
+  }
+  
+  void ExpressionStmt() : {}
+  {
+      <IDENTIFIER> (RegularStatement() | Expression())
+  }
+  
+  void Assignment() : {}
+  {
+      Expression() (<ASSIGN> | <COLON_ASSIGN>) Expression() 
+  }
+  
+  void ReturnStmt() : {}
+  {
+      <RETURN> Expression() ( <SEMICOLON> )?
+  }
+  
+  void IfStmt() : {}
+  {
+      <IF> Expression() Block() ( <ELSE> Block() )?
+  }
+  
+  void ForStmt() : {}
+  {
+      <FOR> ( ForClause() | RangeClause() ) Block()
+  }
+  
+  void ForClause() : {}
+  {
+      SimpleStmt() <SEMICOLON> Expression() <SEMICOLON> SimpleStmt()
+  }
+  
+  void RangeClause() : {}
+  {
+      <IDENTIFIER> (<COMMA> <IDENTIFIER>)? <COLON_ASSIGN> <RANGE> Expression()
+  }
+  
+  void SimpleExpression(): {}
+  {
+      <PLUS> | <MINUS> | <MULTIPLY> | <DIVIDE> | <MOD>
+  }
+  
+  void Expression() : {}
+  {
+      AssignMulExp() <OR> (Primary() SimpleExpression() Primary())*
+  }
+  
+  
+  void AssignMulExp() : {}
+  {
+      MulExp() ( <COMMA> MulExp() ) * 
+  }
+  
+  void MulExp() : {} 
+  {
+      <INTEGER> | <STRING> | <FLOAT> | (<IDENTIFIER>)?
+  }
+  
+  void Primary() : {}
+  {
+      (<IDENTIFIER>)? | <INTEGER> | <FLOAT> | <STRING> | <LPAREN> Expression() <RPAREN>
+  }
+  
+  void TypeDecl() : {}
+  {
+      <TYPE> ( TypeSpec() ( <COMMA> TypeSpec() )* ) ( <SEMICOLON> )?
+  }
+  
+  void TypeSpec() : {}
+  {
+      <IDENTIFIER> Type()
+  }
+  
+  void Type() : {}
+  {
+      TypeName() | TypeLit() | <LPAREN> Type() <RPAREN>
+  }
+  
+  void TypeName() : {}
+  {
+      <STRING> | <INTEGER> | <FLOAT> | <IDENTIFIER>
+  }
+  
+  void TypeLit() : {}
+  {
+      ArrayType() | StructType() | PointerType() | FunctionType() | InterfaceType() | SliceType() | MapType()
+  }
+  
+  void ArrayType() : {}
+  {
+      <LBRACKET> ArrayLength() <RBRACKET> ElementType()
+  }
+  
+  void ArrayLength() : {}
+  {
+      <INTEGER>
+  }
+  
+  void ElementType() : {}
+  {
+      Type()
+  }
+  
+  void StructType() : {}
+  {
+      <STRUCT> <LBRACE> ( StructDeclaration() )* <RBRACE>
+  }
+  
+  void StructDeclaration() : {} 
+  {
+      <IDENTIFIER> TypeName()
+  }
+  
+  void FieldDecl() : {}
+  {
+      IdentifierList() Type()
+  }
+  
+  void IdentifierList() : {}
+  {
+      <IDENTIFIER> ( <COMMA> <IDENTIFIER> )*
+  }
+  
+  void PointerType() : {}
+  {
+      <MULTIPLY> BaseType()
+  }
+  
+  void BaseType() : {}
+  {
+      Type()
+  }
+  
+  void FunctionType() : {}
+  {
+      <FUNC> Signature()
+  }
+  
+  void InterfaceType() : {}
+  {
+      <INTERFACE> <LBRACE> MethodSpec() ( <SEMICOLON> MethodSpec() )* <RBRACE>
+  }
+  
+  void MethodSpec() : {}
+  {
+      <IDENTIFIER> Signature()
+  }
+  
+  void SliceType() : {}
+  {
+      <LBRACKET> <RBRACKET> ElementType()
+  }
+  
+  void MapType() : {}
+  {
+      <MAP> <LBRACKET> KeyType() <RBRACKET> ElementType()
+  }
+  
+  void KeyType() : {}
+  {
+      Type()
+  }
+  
+  void VarDecl() : {}
+  {
+      <VAR> VarSpec() (<SEMICOLON>)?
+  }
+  
+  void VarSpec() : {}
+  {
+      <IDENTIFIER> ( <COMMA> <IDENTIFIER> )* TypeName() (<ASSIGN> Expression())?
+  }
+  
